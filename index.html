@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>糖的時光對話</title>
+<style>
+:root{
+  --cream:#FAF6EC; --paper:#FFFDF8; --brown:#5B4636; --brownL:#EADFCF; --sage:#6F7F63; --sageD:#3F4A37; --sageL:#E6ECDF;
+  --line:#CBBBA4; --text:#2E261F; --grey:#7A7066; --warn:#A4552F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--text);font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans CJK TC",sans-serif;font-size:18px;line-height:1.6}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:880px;margin:0 auto;padding:16px 16px 48px}
+header{background:var(--brown);color:#fff;border-radius:0 0 18px 18px;padding:18px 20px 16px}
+header h1{margin:0;font-size:30px;letter-spacing:2px}
+header p{margin:4px 0 0;opacity:.85;font-size:16px}
+.card{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:18px;margin-top:16px}
+.unlock{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.unlock label{font-weight:700;color:var(--brown);font-size:20px;width:100%}
+.unlock input{flex:1;min-width:200px;font:inherit;font-size:24px;padding:10px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.btn{background:var(--sage);color:#fff;border:0;border-radius:12px;padding:12px 20px;font-size:20px;font-weight:700}
+.btn:active{transform:translateY(1px)}
+.btn.brown{background:var(--brown)}
+.btn.ghost{background:transparent;color:var(--brown);border:2px solid var(--brown)}
+.msg{width:100%;min-height:28px;font-weight:700;margin-top:4px}
+.msg.ok{color:var(--sageD)} .msg.no{color:var(--warn)}
+h2{color:var(--brown);font-size:22px;margin:0 0 10px}
+.eras{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.era{border:2px dashed var(--line);border-radius:14px;padding:10px;background:var(--cream)}
+.era h3{margin:0 0 8px;font-size:16px;color:var(--grey)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slot{border-radius:12px;padding:10px 6px;text-align:center;border:2px solid var(--line);background:#fff;min-height:104px}
+.slot .ic{font-size:38px;line-height:1.2}
+.slot .nm{font-size:15px;font-weight:700}
+.slot.locked{background:#EFEAE0;color:#A79B8C;border-style:dashed;cursor:default}
+.slot.locked .ic{filter:grayscale(1);opacity:.5}
+.slot.open:hover{border-color:var(--sage)}
+.hide{display:none!important}
+.profile .top{display:flex;gap:14px;align-items:center}
+.big{font-size:72px;line-height:1;background:var(--sageL);border-radius:20px;width:110px;height:110px;display:flex;align-items:center;justify-content:center;flex:none}
+.profile h2{margin:0}
+.tag{display:inline-block;background:var(--brownL);color:var(--brown);border-radius:999px;padding:2px 12px;font-size:15px;font-weight:700;margin:4px 6px 0 0}
+.stamp{display:inline-block;border:2px solid var(--warn);color:var(--warn);border-radius:8px;padding:0 8px;font-size:14px;font-weight:700;transform:rotate(-3deg);margin-top:6px}
+.stamp.real{border-color:var(--sageD);color:var(--sageD)}
+.mono p{background:#fff;border:2px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 14px;margin:10px 0;font-size:20px;animation:pop .35s ease}
+.dilemma{background:var(--sageL);border:2px solid var(--sage);border-radius:14px;padding:12px 14px;margin-top:12px}
+.dilemma b{color:var(--sageD)}
+.fact{font-size:15px;color:var(--grey);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pick select{width:100%;font:inherit;font-size:19px;padding:10px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.chat{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.line{display:flex;gap:8px;align-items:flex-end;animation:pop .35s ease}
+.line .av{font-size:34px;flex:none;width:44px;text-align:center}
+.line .bub{background:#fff;border:2px solid var(--line);border-radius:16px;padding:8px 12px;max-width:78%;font-size:19px}
+.line .who{display:block;font-size:13px;color:var(--grey);font-weight:700}
+.line.r{flex-direction:row-reverse}
+.line.r .bub{background:var(--sageL);border-color:var(--sage)}
+.line.me .bub{background:var(--brownL);border-color:var(--brown)}
+.qs{display:grid;gap:10px;margin-top:14px}
+.qs button{background:#fff;border:2px solid var(--brown);color:var(--brown);border-radius:14px;padding:12px;font-size:19px;font-weight:700;text-align:left}
+.round{font-size:15px;color:var(--grey);font-weight:700;margin-top:6px}
+.vs{display:flex;align-items:center;justify-content:center;gap:12px;font-size:20px;font-weight:700;color:var(--brown)}
+.vs span.ic{font-size:44px}
+.history{background:var(--brownL);border-radius:14px;padding:12px 14px;margin-top:14px;font-size:17px}
+.note{font-size:14px;color:var(--grey);text-align:center;margin-top:26px}
+.note button{background:none;border:0;color:var(--grey);text-decoration:underline;font-size:14px}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (max-width:560px){ .pick{grid-template-columns:1fr} header h1{font-size:24px} .big{width:84px;height:84px;font-size:54px} }
+</style>
+</head>
+<body>
+<header><div class="wrap" style="padding:0">
+  <h1>⏳ 糖的時光對話</h1>
+  <p>找到線索卡上的通關密語，見見活在不同年代的人。</p>
+</div></header>
+
+<div class="wrap">
+  <!-- 首頁 -->
+  <section id="home">
+    <div class="card">
+      <form class="unlock" id="unlockForm" autocomplete="off">
+        <label for="pw">🔑 輸入通關密語</label>
+        <input id="pw" placeholder="輸入線索卡上的密語" maxlength="12">
+        <button class="btn" type="submit">解鎖</button>
+        <div class="msg" id="msg"></div>
+      </form>
+    </div>
+    <div class="card">
+      <h2>我遇見的人（<span id="count">0</span> / 12）</h2>
+      <div class="eras" id="eras"></div>
+      <div class="row"><button class="btn brown" id="toTalk">💬 時光對話：讓兩個人聊聊</button></div>
+    </div>
+    <p class="note">這台平板的解鎖紀錄只存在這台裝置。<button id="reset" type="button">清除解鎖紀錄（老師用）</button></p>
+  </section>
+
+  <!-- 人物頁 -->
+  <section id="profile" class="hide">
+    <div class="card profile">
+      <div class="top">
+        <div class="big" id="pIcon"></div>
+        <div>
+          <h2 id="pName"></h2>
+          <div id="pRole" style="color:var(--grey)"></div>
+          <span class="tag" id="pEra"></span><br>
+          <span class="stamp">想像的人物</span> <span class="stamp real">身分與處境有史料依據</span>
+        </div>
+      </div>
+      <div class="mono" id="pTalk"></div>
+      <button class="btn ghost" id="moreBtn">繼續聽他說 ▶</button>
+      <div id="pRest" class="hide">
+        <div class="dilemma">⚖️ <b>他的兩難：</b><span id="pDil"></span></div>
+        <div class="fact">📌 真的發生過：<span id="pFact"></span></div>
+      </div>
+      <div class="row">
+        <button class="btn" id="pTalkBtn">💬 找同時代的人聊聊</button>
+        <button class="btn ghost" data-go="home">↩ 回到首頁</button>
+      </div>
+      <div class="msg no" id="pMsg"></div>
+    </div>
+  </section>
+
+  <!-- 選人對話 -->
+  <section id="pickPage" class="hide">
+    <div class="card">
+      <h2>💬 時光對話</h2>
+      <p style="margin-top:0">選兩個你已經遇見的人。只有<b>活在同一個年代</b>的人，才見得到面喔！</p>
+      <div class="pick">
+        <select id="selA"></select>
+        <select id="selB"></select>
+      </div>
+      <div class="msg" id="pickMsg"></div>
+      <div class="row">
+        <button class="btn" id="startTalk">開始對話</button>
+        <button class="btn ghost" data-go="home">↩ 回到首頁</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 對話 -->
+  <section id="talkPage" class="hide">
+    <div class="card">
+      <div class="vs" id="vs"></div>
+      <h2 id="topic" style="text-align:center;margin-top:8px"></h2>
+      <div class="chat" id="chat"></div>
+      <div class="round" id="roundTxt"></div>
+      <div class="qs" id="qs"></div>
+      <div id="endBox" class="hide">
+        <div class="history" id="historyTxt"></div>
+        <p style="font-weight:700;margin-bottom:0">📝 把你的選擇和一句理由，寫在學習單上。</p>
+        <div class="row">
+          <button class="btn" id="again">🔁 再聊一次</button>
+          <button class="btn ghost" data-go="home">↩ 回到首頁</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// 人物、時代、通關密語、對話 —— 線索卡與網頁共用這一份
+const ERAS = {
+  e1652: { name: '1652年・荷蘭時期', short: '1652年' },
+  eqing: { name: '清代', short: '清代' },
+  e1901: { name: '1901–1902年・日治初期', short: '1901–1902年' },
+  e1925: { name: '1925年・日治時期', short: '1925年' },
+  epost: { name: '1946年前後・戰後', short: '戰後' },
+  e1999: { name: '1999年・糖廠停工', short: '1999年' },
+};
+
+// real: 'type' = 身分與處境有史料依據的典型人物；所有個人姓名與心情都是想像
+const PEOPLE = [
+  { id: 'R01', era: 'e1652', card: 'H04', pass: '赤崁農民', icon: '👨‍🌾', name: '漢人農民 阿成', role: '在赤崁種田的漢人農民',
+    talk: ['今年稻子收成不好，人頭稅卻一點也沒少，還有各種費用要繳。', '昨晚郭懷一他們在商量要反抗，有人說再不站出來，日子只會更難過。我也很生氣。', '可是家裡還有太太和兩個孩子……如果失敗了，他們怎麼辦？'],
+    dilemma: '要站出來爭取，還是先保護家人？', fact: '荷蘭東印度公司向漢人收人頭稅；1652年發生郭懷一事件。' },
+  { id: 'N1', era: 'e1652', card: 'H02', pass: '大員商館', icon: '🧑‍💼', name: '荷蘭書記官 揚恩', role: '荷蘭東印度公司大員商館的書記官',
+    talk: ['公司在大員蓋城堡、養軍隊、派船隊，每一樣都要花錢。', '巴達維亞的總部一直要我把帳算清楚，漢人繳的稅是很重要的收入。', '最近農民一直抱怨稅太重。減稅，公司少了收入誰負責？不減，會不會出事？'],
+    dilemma: '替公司賺錢，還是讓農民喘口氣？', fact: '荷蘭東印度公司在大員設商館，向漢人收稅，經營糖等商品的貿易。' },
+  { id: 'R02', era: 'eqing', card: 'H05', pass: '種稻種蔗', icon: '🧓', name: '地方官員 林大人', role: '清代臺灣的地方官員',
+    talk: ['這幾年，種甘蔗的人一年比一年多。商人說糖能賣好價錢，農民也想多賺一點。', '可是甘蔗要一年多才收成。萬一遇到颱風、乾旱，稻米不夠，百姓要吃什麼？', '我該勸大家改種稻米，還是讓他們自己決定？'],
+    dilemma: '大家吃得飽，還是讓百姓自己選擇種什麼？', fact: '清代臺灣糖廍增加、糖大量運出；稻田和蔗田搶同一塊土地。' },
+  { id: 'N2', era: 'eqing', card: 'H03', pass: '糖廍開工', icon: '🧔', name: '府城糖商 陳老闆', role: '在府城做糖買賣的商人',
+    talk: ['臺灣的糖可以運到中國北方，也能賣到日本，價錢一直不錯。', '我希望更多農民種甘蔗，糖廍多開幾間，生意就更好做。', '可是官員一直說種蔗的人太多，米會不夠……他會不會叫大家不准種？'],
+    dilemma: '抓住賺錢的機會，還是顧到地方的糧食？', fact: '清代臺灣的糖由商人運往中國各地與日本販賣。' },
+  { id: 'R03', era: 'e1901', card: 'H07', pass: '橋仔頭', icon: '👷', name: '糖廍師傅 阿福', role: '在糖廍做了十多年的製糖師傅',
+    talk: ['我在糖廍做了十多年，什麼時候壓甘蔗、什麼時候起鍋，我一看就知道。', '聽說橋仔頭在蓋新工廠，一台機器就能做我們好幾個人的工作。', '新工廠要的是懂機器的人。我已經這個年紀了，還學得會嗎？'],
+    dilemma: '守住熟悉的工作，還是冒險學新技術？', fact: '1901年橋仔頭新式糖廠動工；政府補助大型機器糖廠，傳統小糖廍拿不到。' },
+  { id: 'R04', era: 'e1901', card: 'H06', pass: '糖務局', icon: '🎩', name: '日本糖業官員 田中', role: '臨時臺灣糖務局的官員',
+    talk: ['日本吃的糖很多要跟外國買，每年花掉一大筆錢。臺灣的土地很適合種甘蔗。', '我們要鼓勵會社來投資、引進機器，還要確保工廠有足夠的甘蔗。', '可是規定太嚴，農民會不會反對？甘蔗不夠，會社的錢又要怎麼收回來？'],
+    dilemma: '多做糖、保護投資，還是避免農民反對？', fact: '1902年公布臺灣糖業獎勵規則，並設立臨時臺灣糖務局。' },
+  { id: 'R05', era: 'e1925', card: 'H10', pass: '二林蔗農', icon: '🌾', name: '二林蔗農 阿水', role: '在彰化二林種甘蔗的農民',
+    talk: ['辛苦種了一年甘蔗，只能賣給指定的會社，價錢還是會社說了算。', '大家已經組成蔗農組合，想請會社提高價錢、秤重時讓我們在旁邊看。', '可是如果會社不願意談，我們下一步要怎麼做？'],
+    dilemma: '先顧好生活，還是爭取公平的交易？', fact: '1925年成立二林蔗農組合；同年10月22日發生二林事件。' },
+  { id: 'N3', era: 'e1925', card: 'H09', pass: '原料區', icon: '📋', name: '會社職員 佐藤', role: '林本源製糖會社負責收甘蔗的職員',
+    talk: ['會社買機器、付工資都要花大錢，糖價每年也在變，甘蔗價錢不能隨便提高。', '蔗農組合說我們的秤不公平，可是會社認為秤是準的。', '甘蔗再不收割，工廠就沒辦法開工。上面一直催我，我該怎麼辦？'],
+    dilemma: '照顧會社的成本，還是回應蔗農的要求？', fact: '二林一帶的甘蔗依規定要賣給林本源製糖會社。' },
+  { id: 'R06', era: 'epost', card: 'H08', pass: '五分仔車', icon: '🚂', name: '五分車司機 阿德', role: '兼辦客運路線的五分車司機',
+    talk: ['製糖期一到，糖廠一直催：今天甘蔗要多送兩車。', '月台上還有十幾個人在等車，有學生要趕去上學。', '偏偏火車頭的煞車聲音怪怪的，應該先進廠檢查。今天的班要怎麼排？'],
+    dilemma: '趕快送甘蔗、照顧乘客，還是先顧安全？', fact: '糖業鐵路從1909年起也載客；戰後仍有路線兼辦客運。' },
+  { id: 'R07', era: 'epost', card: 'H11', pass: '台糖成立', icon: '🔧', name: '製糖工人 阿義', role: '戰後回到糖廠的製糖工人',
+    talk: ['戰爭結束了，工廠被炸壞，很多機器不能用。', '公司希望趕快開工，因為糖可以賣到國外，替國家換回外國的錢。我也想早點回來上班。', '可是有些機器還不安全，零件也買不到……'],
+    dilemma: '趕快開工，還是先把安全顧好？', fact: '戰爭末期糖廠被轟炸；1946年台灣糖業公司成立；糖是當時最重要的出口品。' },
+  { id: 'R08', era: 'e1999', card: 'H14', pass: '糖業博物館', icon: '👴', name: '老員工 阿榮伯', role: '在橋頭糖廠工作大半輩子的員工',
+    talk: ['我在這裡工作大半輩子，聽慣了機器的聲音，每一條通道都走過。', '現在糖廠不做糖了。有人說土地應該拿去開發，有人希望把老工廠留下來。', '我們這些在這裡工作過的人，以後還有誰會記得？'],
+    dilemma: '保存大家的記憶，還是讓地方有新發展？', fact: '橋頭糖廠1999年停止製糖；2006年成立臺灣糖業博物館。' },
+  { id: 'N4', era: 'e1999', card: 'H15', pass: '百年提案', icon: '📐', name: '地方規劃師 張小姐', role: '幫地方規劃土地用途的規劃師',
+    talk: ['橋頭的人越來越多，需要道路、房子、公園，也需要工作機會。', '糖廠這麼大一塊地空在那裡，很多人希望拿來好好利用。', '可是也有人說老工廠和樹林都應該留下來。到底該怎麼規劃才好？'],
+    dilemma: '讓地方發展，還是保存老工廠和樹林？', fact: '糖廠停工後，土地怎麼用一直有不同意見；附近新市鎮開發也有爭議。' },
+];
+
+// 對話：a、b 為人物 id；rounds 每輪兩個問題，每個問題有幾句回應 [說話者id, 台詞]
+const DIALOGS = [
+  { era: 'e1652', a: 'R01', b: 'N1', topic: '稅這麼重，日子怎麼過？',
+    rounds: [
+      [{ q: '稅為什麼這麼重？', lines: [['N1', '公司要養軍隊、蓋城堡，還要付船隊的錢，稅是很重要的收入。'], ['R01', '可是今年收成這麼差，我們連自己吃的都不太夠了。']] },
+       { q: '公司為什麼要找漢人來種田？', lines: [['N1', '公司需要米和糖。有人種田，才有東西可以賣，我們還運來耕牛幫忙。'], ['R01', '牛是幫了忙。可是種得再多，也要先繳一筆又一筆的錢。']] }],
+      [{ q: '如果減稅，會怎麼樣？', lines: [['N1', '公司會少一筆收入，總部一定會怪我。'], ['R01', '不減稅，大家的日子真的過不下去了。']] },
+       { q: '聽說有人想反抗，你們知道嗎？', lines: [['N1', '如果有人反抗，公司一定會派軍隊。'], ['R01', '我也怕……可是一直忍下去，又能怎麼辦？']] }],
+      [{ q: '你們最在乎的是什麼？', lines: [['N1', '我在乎公司的帳不要虧錢。'], ['R01', '我在乎太太和孩子能平安過日子。']] },
+       { q: '有沒有兩邊都能接受的辦法？', lines: [['N1', '也許收成差的年份，可以晚一點繳？不過這要總部同意。'], ['R01', '只要能先讓我們吃飽，我願意繼續種田。']] }],
+    ],
+    history: '真實的歷史：1652年9月，郭懷一帶領農民反抗，幾天後就失敗了。上面兩人的對話和商量都是想像的。' },
+  { era: 'eqing', a: 'R02', b: 'N2', topic: '種稻米，還是種甘蔗？',
+    rounds: [
+      [{ q: '為什麼越來越多人種甘蔗？', lines: [['N2', '糖可以賣到中國北方和日本，價錢比米好，農民當然想種。'], ['R02', '可是甘蔗要一年多才收成。萬一遇到災荒，家裡沒米怎麼辦？']] },
+       { q: '種稻米有什麼好處？', lines: [['R02', '稻米一年可以收一到兩次，大家才不會餓肚子。'], ['N2', '賣糖賺到錢，也可以拿去買米啊。']] }],
+      [{ q: '如果米不夠，會發生什麼事？', lines: [['R02', '米會變貴，窮人家就買不起。'], ['N2', '那從別的地方運米過來呢？'], ['R02', '從海上運米要花時間，也要花錢。']] },
+       { q: '如果不准種甘蔗，會發生什麼事？', lines: [['N2', '糖廍沒有甘蔗，工人沒工作，我的生意也會倒。'], ['R02', '我知道，所以我也很為難。']] }],
+      [{ q: '你們最在乎的是什麼？', lines: [['R02', '我在乎百姓不要餓肚子。'], ['N2', '我在乎生意做得下去，大家都有錢賺。']] },
+       { q: '有沒有兩全其美的辦法？', lines: [['R02', '也許比較好的田種稻，比較差的地種甘蔗？'], ['N2', '那我得去說服農民才行。']] }],
+    ],
+    history: '真實的歷史：清代臺灣種甘蔗的人越來越多，稻田和蔗田搶同一塊土地。這兩位人物和對話是想像的。' },
+  { era: 'e1901', a: 'R03', b: 'R04', topic: '機器來了，人怎麼辦？',
+    rounds: [
+      [{ q: '新工廠會帶來什麼改變？', lines: [['R04', '機器一天能壓的甘蔗比牛多很多，臺灣的糖會越做越多。'], ['R03', '糖變多了，可是需要的工人會不會變少？']] },
+       { q: '舊糖廍會怎麼樣？', lines: [['R03', '政府的補助都給大工廠，我們小糖廍一毛也拿不到。'], ['R04', '政府希望臺灣的糖做得又多又好，所以先鼓勵大型工廠。']] }],
+      [{ q: '老師傅能去新工廠工作嗎？', lines: [['R04', '新工廠需要人，但要學看機器、量溫度。'], ['R03', '我做了十幾年糖，一看就知道糖好不好，這也算本事吧？']] },
+       { q: '機器會不會出問題？', lines: [['R04', '機器要有技師照顧，壞了就要停工修理。'], ['R03', '牛累了休息一下就好，機器壞了可就麻煩了。']] }],
+      [{ q: '你們最擔心什麼？', lines: [['R04', '我擔心甘蔗不夠，工廠空轉，投資的錢收不回來。'], ['R03', '我擔心這個年紀學不會新東西，家裡還要靠我養。']] },
+       { q: '怎麼做對兩邊都好？', lines: [['R04', '也許可以請有經驗的師傅，教新工人怎麼看糖。'], ['R03', '如果有人肯教我機器，我也願意試試看。']] }],
+    ],
+    history: '真實的歷史：1902年1月，橋仔頭糖廠開始用機器壓榨甘蔗，之後全臺各地陸續蓋起新式糖廠。兩位人物和對話是想像的。' },
+  { era: 'e1925', a: 'R05', b: 'N3', topic: '甘蔗的價錢，誰說了算？',
+    rounds: [
+      [{ q: '甘蔗的價錢是誰決定的？', lines: [['N3', '會社先算好成本，再公布收購的價錢。'], ['R05', '可是我們沒辦法跟會社商量，只能接受。']] },
+       { q: '為什麼不能賣給別的會社？', lines: [['N3', '政府規定，這一區的甘蔗只能賣給我們會社。'], ['R05', '就像只能讀一間學校，什麼都是那間學校說了算。']] }],
+      [{ q: '秤重時，可以讓蔗農在旁邊看嗎？', lines: [['R05', '我們只是想親眼看到，甘蔗到底秤出多重。'], ['N3', '會社認為自己的秤很準，不需要別人來看。']] },
+       { q: '會社為什麼不提高價錢？', lines: [['N3', '糖價會變，機器和工資也要花錢，價錢不能隨便提高。'], ['R05', '可是我們辛苦種了一年，也要算進去啊。']] }],
+      [{ q: '你們最在乎的是什麼？', lines: [['N3', '我在乎工廠能照時間開工，不要虧錢。'], ['R05', '我在乎辛苦種的甘蔗，能賣到公平的價錢。']] },
+       { q: '如果談不攏，接下來會怎樣？', lines: [['N3', '甘蔗再不收割，工廠就沒辦法開工了。'], ['R05', '大家已經組成蔗農組合，不會輕易讓步。']] }],
+    ],
+    history: '真實的歷史：1925年10月22日，會社在警察陪同下強行採收甘蔗，和蔗農發生衝突，這就是二林事件。兩位人物和對話是想像的。' },
+  { era: 'epost', a: 'R06', b: 'R07', topic: '東西不夠，先顧哪一個？',
+    rounds: [
+      [{ q: '工廠和鐵道，哪個要先修？', lines: [['R07', '壓榨機不修好，甘蔗送來也沒辦法做糖。'], ['R06', '鐵道不修好，甘蔗根本送不到工廠啊。']] },
+       { q: '今天的五分車，要先載什麼？', lines: [['R06', '糖廠催著要甘蔗，月台上又有學生在等車。'], ['R07', '甘蔗砍下來放太久，能做的糖就變少了。可是學生也不能遲到……']] }],
+      [{ q: '為什麼大家這麼急著開工？', lines: [['R07', '糖賣到國外，可以替國家換回外國的錢，大家也才領得到薪水。'], ['R06', '我懂。可是安全一定要顧好。']] },
+       { q: '零件不夠怎麼辦？', lines: [['R07', '有些零件買不到，只好先從壞掉的機器上拆還能用的。'], ['R06', '火車的煞車也一樣，沒修好我可不敢開。']] }],
+      [{ q: '你們最在乎的是什麼？', lines: [['R06', '我在乎每一趟車都平安。'], ['R07', '我在乎工廠早點開工，生活才有希望。']] },
+       { q: '有沒有兩邊都顧到的辦法？', lines: [['R07', '也許先修最重要的一條鐵道，再修壓榨機。'], ['R06', '客運的班次，可以排在甘蔗比較少的時間。']] }],
+    ],
+    history: '真實的歷史：1946年台灣糖業公司成立，開始修復被炸壞的糖廠；1950年糖的出口曾占臺灣出口總額約八成。兩位人物和對話是想像的。' },
+  { era: 'e1999', a: 'R08', b: 'N4', topic: '糖廠不做糖之後呢？',
+    rounds: [
+      [{ q: '這塊地以後要做什麼？', lines: [['N4', '橋頭的人越來越多，需要道路、房子和公園。'], ['R08', '可是這裡有快一百年的工廠和宿舍，拆掉就回不來了。']] },
+       { q: '老工廠還有用嗎？', lines: [['R08', '機器、宿舍、防空洞都還在，可以讓孩子看見以前怎麼做糖。'], ['N4', '保留下來也要花錢維修，這筆錢從哪裡來？']] }],
+      [{ q: '保留下來，會有人來看嗎？', lines: [['N4', '如果做成園區，也許能吸引遊客。'], ['R08', '我可以當導覽員，講我們以前的故事。']] },
+       { q: '開發以後，會失去什麼？', lines: [['R08', '老建築沒了，大家的記憶也跟著沒了。'], ['N4', '樹林和農田如果都蓋房子，下大雨時水比較難排掉，這也要考慮。']] }],
+      [{ q: '你們最在乎的是什麼？', lines: [['R08', '我在乎這裡的故事有人記得。'], ['N4', '我在乎地方上的人有工作、生活過得好。']] },
+       { q: '有沒有兩邊都顧到的辦法？', lines: [['N4', '也許一部分做成博物館，一部分做新的建設。'], ['R08', '那最老的製糖工場，一定要留下來。']] }],
+    ],
+    history: '真實的歷史：2006年，橋頭糖廠成立臺灣糖業博物館；附近的新市鎮開發，到現在仍有不同意見。兩位人物和對話是想像的。' },
+];
+if (typeof module !== 'undefined') module.exports = { ERAS, PEOPLE, DIALOGS };
+
+(function(){
+  const KEY = 'sugarTimeTalk_v1';
+  const $ = id => document.getElementById(id);
+  const byId = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
+  let unlocked = load();
+
+  function load(){ try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v.filter(id => byId[id]) : []; } catch(e){ return []; } }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(unlocked)); } catch(e){} }
+  function norm(s){
+    return String(s || '').normalize('NFKC').replace(/[\s，,。.！!？?「」『』"'、：:]/g, '').replace(/台/g, '臺').replace(/糖蔀/g, '糖廍');
+  }
+  const PASS = {}; PEOPLE.forEach(p => { PASS[norm(p.pass)] = p.id; });
+
+  function show(id){ ['home','profile','pickPage','talkPage'].forEach(s => $(s).classList.toggle('hide', s !== id)); window.scrollTo(0,0); }
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { renderHome(); show(b.dataset.go); }));
+
+  // ---------- 首頁 ----------
+  function renderHome(){
+    $('count').textContent = unlocked.length;
+    const box = $('eras'); box.innerHTML = '';
+    Object.keys(ERAS).forEach(ek => {
+      const div = document.createElement('div'); div.className = 'era';
+      div.innerHTML = `<h3>${ERAS[ek].name}</h3><div class="slots"></div>`;
+      PEOPLE.filter(p => p.era === ek).forEach(p => {
+        const open = unlocked.includes(p.id);
+        const b = document.createElement('button');
+        b.className = 'slot ' + (open ? 'open' : 'locked');
+        b.dataset.id = p.id;
+        b.innerHTML = open ? `<div class="ic">${p.icon}</div><div class="nm">${p.name}</div>` : `<div class="ic">❔</div><div class="nm">還沒遇見</div>`;
+        if (open) b.addEventListener('click', () => openProfile(p.id)); else b.disabled = true;
+        div.querySelector('.slots').appendChild(b);
+      });
+      box.appendChild(div);
+    });
+  }
+  $('unlockForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = norm($('pw').value), m = $('msg');
+    if (!v){ m.className = 'msg no'; m.textContent = '先輸入通關密語喔！'; return; }
+    const id = PASS[v];
+    if (!id){ m.className = 'msg no'; m.textContent = '密語不對喔，再看一次線索卡上的🔑通關密語。'; return; }
+    const p = byId[id];
+    if (!unlocked.includes(id)){ unlocked.push(id); save(); }
+    m.className = 'msg ok'; m.textContent = `✨ 你遇見了 ${p.name}！`;
+    $('pw').value = ''; renderHome();
+    setTimeout(() => openProfile(id), 600);
+  });
+  $('reset').addEventListener('click', () => {
+    if (confirm('確定要清除這台裝置的所有解鎖紀錄嗎？')){ unlocked = []; save(); renderHome(); $('msg').textContent = ''; }
+  });
+
+  // ---------- 人物頁 ----------
+  let cur = null, step = 0;
+  function openProfile(id){
+    const p = byId[id]; cur = p; step = 0;
+    $('pIcon').textContent = p.icon; $('pName').textContent = p.name; $('pRole').textContent = p.role;
+    $('pEra').textContent = ERAS[p.era].name; $('pDil').textContent = p.dilemma; $('pFact').textContent = p.fact;
+    $('pTalk').innerHTML = ''; $('pRest').classList.add('hide'); $('moreBtn').classList.remove('hide'); $('pMsg').textContent = '';
+    nextLine(); show('profile');
+  }
+  function nextLine(){
+    if (step < cur.talk.length){ const el = document.createElement('p'); el.textContent = cur.talk[step++]; $('pTalk').appendChild(el); }
+    if (step >= cur.talk.length){ $('moreBtn').classList.add('hide'); $('pRest').classList.remove('hide'); }
+  }
+  $('moreBtn').addEventListener('click', nextLine);
+  $('pTalkBtn').addEventListener('click', () => {
+    const d = DIALOGS.find(x => x.a === cur.id || x.b === cur.id);
+    const other = d.a === cur.id ? d.b : d.a;
+    if (!unlocked.includes(other)){ $('pMsg').textContent = `「${ERAS[cur.era].short}」還有另一個人等著你。找到他的通關密語，才能讓他們聊天！`; return; }
+    startDialog(d);
+  });
+
+  // ---------- 選人 ----------
+  function fillSelect(sel, keep){
+    sel.innerHTML = '<option value="">— 選一個人 —</option>' + unlocked.map(id => `<option value="${id}">${byId[id].icon} ${byId[id].name}（${ERAS[byId[id].era].short}）</option>`).join('');
+    if (keep) sel.value = keep;
+  }
+  $('toTalk').addEventListener('click', () => {
+    fillSelect($('selA')); fillSelect($('selB')); $('pickMsg').textContent = '';
+    if (unlocked.length < 2){ $('pickMsg').className = 'msg no'; $('pickMsg').textContent = '至少要遇見兩個人，才能開始對話喔！'; }
+    show('pickPage');
+  });
+  $('startTalk').addEventListener('click', () => {
+    const a = $('selA').value, b = $('selB').value, m = $('pickMsg'); m.className = 'msg no';
+    if (!a || !b){ m.textContent = '請選兩個人。'; return; }
+    if (a === b){ m.textContent = '要選兩個不同的人喔！'; return; }
+    const A = byId[a], B = byId[b];
+    if (A.era !== B.era){ m.textContent = `⏳ ${A.name}活在「${ERAS[A.era].short}」，${B.name}活在「${ERAS[B.era].short}」——不同年代，見不到面喔！`; return; }
+    startDialog(DIALOGS.find(d => d.era === A.era));
+  });
+
+  // ---------- 對話 ----------
+  let dlg = null, r = 0, busy = false;
+  function startDialog(d){
+    dlg = d; r = 0; busy = false;
+    const A = byId[d.a], B = byId[d.b];
+    $('vs').innerHTML = `<span class="ic">${A.icon}</span>${A.name}<span>✕</span>${B.name}<span class="ic">${B.icon}</span>`;
+    $('topic').textContent = d.topic; $('chat').innerHTML = ''; $('endBox').classList.add('hide');
+    say('me', `你穿越時光，來到「${ERAS[d.era].name}」。兩個人正在說話，你想問他們什麼？`);
+    renderQs(); show('talkPage');
+  }
+  function say(who, text){
+    const el = document.createElement('div');
+    if (who === 'me'){ el.className = 'line me'; el.innerHTML = `<div class="av">🧒</div><div class="bub"><span class="who">你</span></div>`; }
+    else { const p = byId[who]; el.className = 'line' + (who === dlg.b ? ' r' : ''); el.innerHTML = `<div class="av">${p.icon}</div><div class="bub"><span class="who">${p.name}</span></div>`; }
+    el.querySelector('.bub').appendChild(document.createTextNode(text));
+    $('chat').appendChild(el); el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+  function renderQs(){
+    const qs = $('qs'); qs.innerHTML = '';
+    if (r >= dlg.rounds.length){ return askSide(); }
+    $('roundTxt').textContent = `第 ${r + 1} 題／共 ${dlg.rounds.length} 題　選一個問題問他們：`;
+    dlg.rounds[r].forEach(opt => {
+      const b = document.createElement('button'); b.textContent = '🙋 ' + opt.q;
+      b.addEventListener('click', () => ask(opt)); qs.appendChild(b);
+    });
+  }
+  function ask(opt){
+    if (busy) return; busy = true; $('qs').innerHTML = ''; $('roundTxt').textContent = '';
+    say('me', opt.q);
+    let i = 0;
+    const tick = () => {
+      if (i < opt.lines.length){ const [w, t] = opt.lines[i++]; say(w, t); setTimeout(tick, window.FAST ? 0 : 900); }
+      else { busy = false; r++; renderQs(); }
+    };
+    setTimeout(tick, window.FAST ? 0 : 600);
+  }
+  function askSide(){
+    $('roundTxt').textContent = '最後一題：聽完他們的話，你比較同意誰？';
+    const A = byId[dlg.a], B = byId[dlg.b];
+    [[`${A.icon} ${A.name}`, A.name], [`${B.icon} ${B.name}`, B.name], ['🤔 兩個人都有道理', '兩個人都有道理']].forEach(([label, val]) => {
+      const b = document.createElement('button'); b.textContent = label;
+      b.addEventListener('click', () => {
+        $('qs').innerHTML = ''; $('roundTxt').textContent = '';
+        say('me', val === '兩個人都有道理' ? '我覺得兩個人都有道理。' : `我比較同意${val}。`);
+        $('historyTxt').textContent = '📜 ' + dlg.history + ' 這題沒有標準答案，換作是你，會怎麼做？';
+        $('endBox').classList.remove('hide');
+        $('endBox').scrollIntoView({ behavior: 'smooth', block: 'end' });
+      });
+      $('qs').appendChild(b);
+    });
+  }
+  $('again').addEventListener('click', () => startDialog(dlg));
+
+  renderHome();
+})();
+</script>
+</body>
+</html>
