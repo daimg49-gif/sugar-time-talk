@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&display=swap" rel="stylesheet">
 <style>
 :root{
+  --fz:1;
   --ink:#2B231C; --ink2:#5A4C3E; --paper:#F6EEDC; --edge:#C9B48E;
   --brass:#B88A3C; --brass2:#8C6424; --wood:#4A3424; --red:#9A3B2E;
   --serif:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;
@@ -45,7 +46,13 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .engrave input::placeholder{color:#8F7A5C;letter-spacing:.05em;font-size:16px}
 .engrave button{padding:0 16px;background:linear-gradient(#C99A48,#8C6424);color:#2B1B0E;font-weight:900;letter-spacing:.15em;border-radius:2px}
 #hint{min-height:44px;margin-top:10px;font-size:15px;line-height:1.6;color:#E9D7B0}
-.sound{position:fixed;top:10px;right:12px;z-index:50;font-size:13px;letter-spacing:.1em;color:#F3E6C8;border:1px solid rgba(243,230,200,.4);padding:4px 10px;background:rgba(0,0,0,.3)}
+.tools{position:fixed;top:10px;right:12px;z-index:50;display:flex;gap:6px}
+.tools button{font-size:13px;letter-spacing:.1em;color:#F3E6C8;border:1px solid rgba(243,230,200,.4);padding:4px 10px;background:rgba(0,0,0,.35)}
+.tools .fz{display:flex}
+.tools .fz button{padding:4px 9px;border-right-width:0}
+.tools .fz button:last-child{border-right-width:1px}
+.tools .fz button.on{background:#C99A48;color:#2B1B0E;border-color:#C99A48}
+.tools .fz span{font-size:13px;color:#F3E6C8;padding:5px 6px 0 0;letter-spacing:.1em}
 
 .album{background:var(--paper);border-radius:3px 10px 10px 3px;box-shadow:0 18px 30px rgba(0,0,0,.45),inset 14px 0 18px -10px rgba(0,0,0,.25);padding:18px 20px 24px;
   background-image:radial-gradient(rgba(120,90,50,.07) 1px,transparent 1px);background-size:5px 5px}
@@ -75,7 +82,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px}
 .it{background:#FFFBF1;border:1px solid var(--edge);padding:10px 8px;text-align:center;font-size:14px;box-shadow:2px 3px 0 rgba(0,0,0,.08);cursor:pointer}
 .it svg{width:60px;height:60px;display:block;margin:0 auto 6px}
-.said p{margin:0;padding:9px 0;border-bottom:1px dashed var(--edge);font-size:15px;line-height:1.7}
+.said p{margin:0;padding:9px 0;border-bottom:1px dashed var(--edge);font-size:calc(15px * var(--fz));line-height:1.7}
 .said p b{font-weight:600}
 .said p span{color:var(--ink2);font-size:13px;margin-right:6px}
 .empty{color:var(--ink2);font-size:15px;padding:18px 0}
@@ -113,22 +120,22 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 #box{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(94vw,900px);min-height:min(26vh,200px);
   background:linear-gradient(180deg,#F8F0DE,#EEE2C8);border:1px solid #BFA77C;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 5px rgba(255,255,255,.35),inset 0 0 0 6px rgba(150,120,80,.35);
   padding:26px 28px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;z-index:4}
-#name{position:absolute;top:-19px;left:22px;background:var(--wood);color:#F5E6C6;padding:5px 18px 6px;font-weight:600;letter-spacing:.2em;font-size:17px;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+#name{position:absolute;top:-19px;left:22px;background:var(--wood);color:#F5E6C6;padding:5px 18px 6px;font-weight:600;letter-spacing:.2em;font-size:calc(17px * var(--fz));box-shadow:0 3px 0 rgba(0,0,0,.25)}
 #name.you{background:var(--red)}
-#text{font-size:clamp(18px,2.6vw,23px);line-height:1.75;min-height:2.6em}
-#text.nar{color:#5E4E3E;font-size:clamp(17px,2.4vw,21px)}
+#text{font-size:calc(clamp(18px,2.6vw,23px) * var(--fz));line-height:1.75;min-height:2.6em}
+#text.nar{color:#5E4E3E;font-size:calc(clamp(17px,2.4vw,21px) * var(--fz))}
 #more{position:absolute;right:20px;bottom:12px;width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:11px solid var(--brass2);opacity:0}
 #more.on{opacity:1;animation:blink 1s infinite}
 @keyframes blink{50%{transform:translateY(4px)}}
 #choices{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(min(26vh,200px) + 34px);width:min(92vw,620px);display:flex;flex-direction:column;gap:10px;z-index:5}
-#choices button{background:#FBF4E2;border:1px solid #B79A6A;padding:13px 18px 13px 22px;font-size:clamp(17px,2.4vw,20px);text-align:left;box-shadow:3px 4px 0 rgba(0,0,0,.25);animation:drop .35s ease both;position:relative}
+#choices button{background:#FBF4E2;border:1px solid #B79A6A;padding:13px 18px 13px 22px;font-size:calc(clamp(17px,2.4vw,20px) * var(--fz));text-align:left;box-shadow:3px 4px 0 rgba(0,0,0,.25);animation:drop .35s ease both;position:relative}
 #choices button:nth-child(2){animation-delay:.07s}#choices button:nth-child(3){animation-delay:.14s}#choices button:nth-child(4){animation-delay:.21s}
 #choices button::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--brass)}
 #choices button:hover{background:#FFF8E8}
 @keyframes drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 #topbar{position:absolute;top:10px;left:12px;z-index:6}
 #topbar button{font-size:13px;letter-spacing:.12em;color:#F6EAD0;border:1px solid rgba(246,234,208,.45);padding:5px 10px;background:rgba(0,0,0,.3)}
-#placeTag{position:absolute;top:44px;right:14px;z-index:6;color:#F6EAD0;font-size:14px;letter-spacing:.25em;text-shadow:0 1px 3px #000;opacity:.85}
+#placeTag{position:absolute;top:48px;right:14px;z-index:6;color:#F6EAD0;font-size:14px;letter-spacing:.25em;text-shadow:0 1px 3px #000;opacity:.85}
 
 /* 物件 */
 #itemLayer{position:absolute;inset:0;z-index:20;background:rgba(20,12,6,.62);display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .4s}
@@ -143,7 +150,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .face2 .from{font-size:14px;color:var(--ink2);margin-top:6px}
 .face2.bk{transform:rotateY(180deg);justify-content:flex-start;text-align:left;align-items:stretch}
 .face2.bk .h{font-size:14px;letter-spacing:.3em;color:var(--ink2);border-bottom:1px solid var(--edge);padding-bottom:6px;margin-bottom:12px}
-.face2.bk .tx{font-size:clamp(16px,2.4vw,18px);line-height:1.85}
+.face2.bk .tx{font-size:calc(clamp(16px,2.4vw,18px) * var(--fz));line-height:1.85}
 .stamp{margin-top:auto;align-self:flex-end;border:2px solid var(--red);color:var(--red);padding:2px 10px;font-weight:900;letter-spacing:.2em;transform:rotate(-6deg);font-size:15px;opacity:.85}
 .tip{color:#F3E6C8;margin-top:14px;font-size:14px;letter-spacing:.15em;opacity:.8}
 .brassbtn{margin-top:12px;padding:10px 26px;background:linear-gradient(#C99A48,#8C6424);color:#2B1B0E;font-weight:900;letter-spacing:.2em}
@@ -232,7 +239,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 <div id="warp"></div>
 <div id="card"><div class="y" id="cardY"></div><div class="pl" id="cardP"></div></div>
 <div id="viewer"><div class="flip back"><div class="in"><div class="face2" id="vFront"></div><div class="face2 bk" id="vBack"></div></div></div><button id="itemDone2" class="brassbtn">闔上</button></div>
-<button class="sound" id="snd">聲音：關</button>
+<div class="tools"><div class="fz" id="fz"><span>字</span><button data-z="1">小</button><button data-z="1.18">中</button><button data-z="1.36">大</button></div><button id="snd">聲音：關</button></div>
 
 <script>
 // 糖的時光對話 v3 —— 人物、場景、對話資料（線索卡、學習單、網站共用）
@@ -474,23 +481,6 @@ const PEOPLE = [
   give: '*阿榮伯脫下一隻舊手套，拍掉灰塵，放到你手上。',
   item: { name: '最後一季的工作手套', text: '橋仔頭糖廠從1902年開始壓甘蔗，到1999年停止製糖，做了將近一百年的糖。' } },
 
-{ id: 'N4', era: 'e1999', card: 'H16', pass: '百年提案', name: '張小姐', role: '幫地方規劃土地的規劃師',
-  look: { hat: 'none', hair: 'pony', top: '5B6E78', bottom: '3E3E46', female: true, acc: 'map', skin: 'E3BE98' },
-  scene: ['*糖廠外面的空地，風把雜草吹得東倒西歪。', '*一個穿外套的女生把一大張地圖攤在車子的引擎蓋上，用石頭壓住四個角。', '哎，幫我壓一下這一角……謝謝！', '你看，這整片都是糖廠的地，好大吧？'],
-  pick: [
-    { t: '「你要在這裡蓋什麼？」', r: ['還沒決定，所以我才在這裡畫啊。', '道路、房子、公園……每個人想要的都不一樣。'] },
-    { t: '「地圖上的紅線是什麼？」', r: ['那是一條新的路。有了路，車子才進得來。', '可是它會穿過那片樹林。'] },
-  ],
-  mid: ['老員工希望留下工廠；年輕人希望有工作；還有人要保護樹林。', '每個人說得都有道理，可是地只有一塊。', '*她拿起鉛筆，在地圖上畫了一條線，又擦掉。', '明天就要交初稿了。'],
-  ask: '如果你只能畫一條線，你會畫在哪裡？',
-  ans: [
-    { t: '「繞過樹林。」', r: ['繞過去，路就變長了，錢也變多。', '……不過，我可以算算看。'] },
-    { t: '「穿過空地，蓋房子。」', r: ['嗯，空地最好用。', '可是空地旁邊，就是老宿舍。'] },
-    { t: '「先問住在這裡的人。」', r: ['說明會辦過了，來的人不多。', '也許……我該自己去敲門問問。'] },
-  ],
-  give: '*張小姐把一張舊的草圖撕下來給你。「這張畫錯了，送你。」',
-  item: { name: '土地規劃草圖', text: '台糖曾經有42座糖廠。1970年代起，國外的糖越來越便宜，臺灣自己做糖的成本卻越來越高，糖廠一座座合併或關閉，留下很多土地要重新規劃。' } },
-
 { id: 'V1', era: 'e1999', card: 'H15', pass: '守護樹林', name: '美玲', role: '守護糖廠樹林的志工',
   look: { hat: 'bucket', hair: 'bob', top: '5F7F55', bottom: '4A4A3E', female: true, acc: 'leaf', skin: 'D9AE84' },
   scene: ['*走進樹林，空氣一下子涼了下來。', '*一個戴帽子的姊姊蹲在地上，拿著放大鏡看一片葉子。', '噓——小聲一點，樹上有一隻五色鳥。', '……飛走了。沒關係，牠明天還會來。'],
@@ -503,7 +493,7 @@ const PEOPLE = [
   ans: [
     { t: '「留下來。」', r: ['謝謝你。', '只是，光說「留下來」不夠，我還要想辦法說服別人。'] },
     { t: '「留一半就好。」', r: ['一半……要留哪一半呢？', '*她拿出筆記本，畫了一條線，又看了很久。'] },
-    { t: '「我想先看看地圖。」', r: ['好主意，我也想知道新的路會經過哪裡。', '規劃的張小姐，應該在糖廠門口。'] },
+    { t: '「我想先看看哪裡最重要。」', r: ['好主意，我這幾年的紀錄都在這本筆記裡。', '哪裡鳥最多、哪裡下雨會積水，我都畫下來了。'] },
   ],
   give: '*美玲從筆記本裡抽出一片壓乾的葉子。「我有很多，這片給你。」',
   item: { name: '樹葉標本', text: '樹林和農田可以幫忙吸住雨水。橋頭糖廠附近的典寶溪下游，近年常常淹水，所以有人擔心開發會讓水患更嚴重。' } },
@@ -523,7 +513,7 @@ const PEOPLE = [
     { t: '「去說明會講你的想法。」', r: ['說明會？我以為那是大人的事。', '……我也是大人了耶。好，我去。'] },
   ],
   give: '*志豪把冰棒的包裝紙摺成一隻小船，放到你手上。',
-  item: { name: '冰棒包裝紙', text: '因為臺灣自己做糖的成本比較高，今天我們吃的糖，大多是從國外買來的。' } },
+  item: { name: '冰棒包裝紙', text: '台糖曾經有42座糖廠。1970年代起，國外的糖越來越便宜，臺灣自己做糖的成本比較高，糖廠一座座合併或關閉。今天我們吃的糖，大多是從國外買來的。' } },
 ];
 
 // ───────── 兩人見面 ─────────
@@ -672,22 +662,6 @@ const DIALOGS = [
   ],
   item: { name: '台糖成立公告', text: '1946年5月1日，台灣糖業公司成立，接手日本人留下的糖廠，開始修理機器、鐵道和廠房。' } },
 
-{ era: 'e1999', a: 'R08', b: 'N4', place: '老工廠裡',
-  open: [['*', '張小姐拿著地圖走進工廠，阿榮伯正在擦機器。'], ['b', '阿伯好，我是來做土地規劃的。'], ['a', '規劃？是要來拆的吧。']],
-  beats: [
-    [{ t: '「張小姐要拆工廠嗎？」', r: [['b', '還沒有決定，我是來看看的。'], ['a', '那你看仔細一點。']] },
-     { t: '「阿伯，這台機器是什麼？」', r: [['a', '蒸發罐，把甘蔗汁煮濃的。'], ['b', '……原來是這個用途。']] }],
-    [{ t: '「留下來要花很多錢嗎？」', r: [['b', '老房子要修，機器要保養，每年都要錢。'], ['a', '錢……我們以前也幫國家賺了很多錢啊。']] },
-     { t: '「蓋新房子有什麼好處？」', r: [['b', '會有新的人住進來，地方會熱鬧。'], ['a', '熱鬧……以前這裡最熱鬧了。']] }],
-  ],
-  ask: [['b', '阿伯，如果只能留一部分呢？'], ['a', '那要留哪一部分？'], ['*', '兩個人都看著你。']],
-  ans: [
-    { t: '「留下製糖工場。」', r: [['a', '對，這是最重要的。'], ['b', '好，我把它圈起來。']] },
-    { t: '「留下宿舍和防空洞。」', r: [['a', '宿舍……那是我們住的地方。'], ['b', '嗯，那裡也很有故事。']] },
-    { t: '「全部留下來。」', r: [['b', '全部留下來，維修的錢就要找人出。'], ['a', '……那就讓大家來參觀，門票也是錢啊。']] },
-  ],
-  item: { name: '博物館的門票', text: '2006年，台糖在橋頭糖廠成立臺灣糖業博物館。製糖工場、日式宿舍、防空洞都保留了下來；1901年蓋的辦公室，牆上還有防備攻擊用的槍孔。' } },
-
 { era: 'e1999', a: 'R08', b: 'V1', place: '樹林小路',
   open: [['*', '美玲在樹林裡遇見正在散步的阿榮伯。'], ['b', '阿伯，你也來散步？'], ['a', '以前下班，大家都來這裡乘涼。']],
   beats: [
@@ -702,7 +676,7 @@ const DIALOGS = [
     { t: '「我也一起去！」', r: [['b', '好啊，多一個人，多一份力量。'], ['a', '那我得穿得整齊一點。']] },
     { t: '「做一條導覽路線。」', r: [['b', '先看老工廠，再走進樹林？'], ['a', '五分車就停在中間，剛好。']] },
   ],
-  item: { name: '生態觀察筆記', text: '橋頭新市鎮規劃時，有民間團體提出保留一百多公頃森林、改走原有道路的方案。' } },
+  item: { name: '生態觀察筆記', text: '2006年，橋頭糖廠成立臺灣糖業博物館，製糖工場、宿舍和防空洞都保留了下來。新市鎮規劃時，也有民間團體提出保留一百多公頃森林、改走原有道路的方案。' } },
 
 { era: 'e1999', a: 'R08', b: 'Y1', place: '冰店門口',
   open: [['*', '志豪在冰店門口遇到阿榮伯。'], ['b', '阿榮伯！你還記得我嗎？小時候常來偷看你們做糖。'], ['a', '志豪！長這麼高了。']],
@@ -719,38 +693,6 @@ const DIALOGS = [
     { t: '「把老工廠變成工作的地方。」', r: [['a', '博物館、冰店、導覽，也需要人。'], ['b', '那我來幫忙經營！']] },
   ],
   item: { name: '五分車的假日車票', text: '橋頭糖廠的五分車，現在假日改載遊客。糖廠園區旁邊，就是高雄捷運的「橋頭糖廠站」。' } },
-
-{ era: 'e1999', a: 'N4', b: 'V1', place: '地圖上的紅線',
-  open: [['*', '美玲走到張小姐的地圖前，指著一條紅線。'], ['b', '這條路，會穿過我們的樹林。'], ['a', '我知道……我也在煩惱這一條。']],
-  beats: [
-    [{ t: '「為什麼要開這條路？」', r: [['a', '有了路，車子才進得來，新市鎮才能蓋。'], ['b', '旁邊不是已經有兩條路了嗎？']] },
-     { t: '「樹林有什麼重要？」', r: [['b', '大雨的時候，樹林能把雨水吸住。'], ['a', '……下游確實常常淹水。']] }],
-    [{ t: '「繞過去會怎樣？」', r: [['a', '路會變長，錢會變多。'], ['b', '可是一百年的大樹，砍了就種不回來。']] },
-     { t: '「不開路會怎樣？」', r: [['a', '房子蓋不起來，年輕人就留不下來。'], ['b', '……這個我也知道。']] }],
-  ],
-  ask: [['a', '明天就要交初稿了。'], ['b', '拜託你再想一想。'], ['*', '張小姐拿起鉛筆，看向你。']],
-  ans: [
-    { t: '「讓路繞過樹林。」', r: [['a', '好，我來算算多出來的錢。'], ['b', '謝謝你！']] },
-    { t: '「照原本的路開。」', r: [['*', '美玲沒有說話。'], ['a', '我會在路旁邊多種一些樹……雖然，不一樣。']] },
-    { t: '「先調查哪裡最重要。」', r: [['b', '我有這幾年的生態紀錄，可以給你。'], ['a', '太好了，有資料，我才好跟上面說。']] },
-  ],
-  item: { name: '臺灣糖廠分布圖', text: '到今天，臺灣只剩雲林虎尾、臺南善化兩座糖廠還在用甘蔗製糖；虎尾糖廠的製糖期，還能看到五分車載甘蔗。高雄小港廠則把國外買來的粗糖再精煉。' } },
-
-{ era: 'e1999', a: 'N4', b: 'Y1', place: '說明會',
-  open: [['*', '說明會的會場裡，椅子只坐滿一半。'], ['*', '志豪舉起手。'], ['b', '我想問，新市鎮會有工作嗎？'], ['a', '……謝謝你的問題。終於有年輕人來了。']],
-  beats: [
-    [{ t: '「會有什麼工作？」', r: [['a', '如果有公司願意進來，就會有工作。'], ['b', '「如果」……']] },
-     { t: '「為什麼來的人這麼少？」', r: [['b', '大家都不知道今天要開會。'], ['a', '……傳單可能發得不夠。']] }],
-    [{ t: '「老工廠會被拆嗎？」', r: [['a', '很多人希望留下來，我們會考慮。'], ['b', '我也希望留著，那是我長大的地方。']] },
-     { t: '「房子會很貴嗎？」', r: [['a', '還不知道。'], ['b', '太貴的話，年輕人一樣住不起。']] }],
-  ],
-  ask: [['a', '你希望這裡變成什麼樣子？'], ['b', '我……'], ['*', '志豪轉頭看你，好像想要你幫他說。']],
-  ans: [
-    { t: '「有工作的地方。」', r: [['b', '對，讓我們不用離開。'], ['a', '我寫下來了：工作機會。']] },
-    { t: '「老工廠和新房子都在的地方。」', r: [['a', '舊的和新的放在一起……這個可以畫。'], ['b', '嗯，就是這樣！']] },
-    { t: '「讓更多人來說說看。」', r: [['b', '下次我拉同學一起來。'], ['a', '那我把傳單多印一點。']] },
-  ],
-  item: { name: '說明會的簽到單', text: '高雄新市鎮的開發計畫辦過說明會，但不少居民表示不清楚計畫內容。' } },
 
 { era: 'e1999', a: 'V1', b: 'Y1', place: '樹林入口',
   open: [['*', '樹林入口，美玲和志豪同時停下腳步。'], ['b', '……美玲？國小坐我旁邊的那個美玲？'], ['a', '志豪！你不是要去臺北了？']],
@@ -1209,6 +1151,9 @@ const startDialog = quiet(async function(d){
   await ending(d.era, [d.a, d.b], rid);
 });
 
+function setFz(z){ document.documentElement.style.setProperty('--fz', z); document.querySelectorAll('#fz button').forEach(b => b.classList.toggle('on', b.dataset.z === String(z))); try { localStorage.setItem('sugarTimeTalk_fz', String(z)); } catch(e){} }
+document.querySelectorAll('#fz button').forEach(b => b.addEventListener('click', () => setFz(b.dataset.z)));
+setFz((() => { try { const v = localStorage.getItem('sugarTimeTalk_fz'); return ['1','1.18','1.36'].includes(v) ? v : '1'; } catch(e){ return '1'; } })());
 $('openBtn').addEventListener('click', () => { renderDesk(); showScreen('desk'); });
 window.__game = { startSolo, startDialog, DLG, pairKey, get prog(){ return prog; }, get unlocked(){ return unlocked; } };
 })();
