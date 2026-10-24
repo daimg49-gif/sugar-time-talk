@@ -242,6 +242,11 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 <div class="tools"><div class="fz" id="fz"><span>字</span><button data-z="1">小</button><button data-z="1.18">中</button><button data-z="1.36">大</button></div><button id="snd">聲音：關</button></div>
 
 <script>
+/* 工具箱・記憶：雲端紀錄暫存佇列。Firebase 載入完成前先排隊，載入失敗（離線）也不影響遊戲 */
+window.__sttQ = window.__sttQ || [];
+window.sttLog = window.sttLog || function(col, data){ try { window.__sttQ.push([col, data]); } catch(e){} };
+</script>
+<script>
 // 糖的時光對話 v3 —— 人物、場景、對話資料（線索卡、學習單、網站共用）
 // 單人場景：字串＝人物說話；「*」開頭＝旁白。對話：['a'|'b'|'*', 文字]
 const ERAS = {
@@ -1111,6 +1116,7 @@ function travel(era, place, then){
 
 /* 劇本播放器 */
 let cast = {}, typing = null, waiting = null, runId = 0;
+let lastSaid = '', curScene = null; /* 雲端紀錄用：最後一句台詞、目前場景 */
 function showScreen(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
 function setStage(era, set, v, place){
   curSet = [set, v];
@@ -1129,6 +1135,7 @@ function focus(id){ Object.entries(cast).forEach(([k, el]) => { el.classList.tog
 function line(who, text, rid){
   return new Promise((res, rej) => {
     if (rid !== runId) return rej('stale');
+    if (who !== '*' && who !== 'you') lastSaid = (byId[who] ? byId[who].name + '：' : '') + text;
     $('choices').innerHTML = '';
     const nm = $('name'), tx = $('text'), more = $('more');
     if (who === '*'){ nm.className = 'hide'; tx.className = 'nar'; focus('*'); }
@@ -1144,12 +1151,15 @@ function line(who, text, rid){
   });
 }
 document.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && $('stage').classList.contains('on') && !$('choices').children.length && document.activeElement.tagName !== 'INPUT'){ e.preventDefault(); $('box').onclick && $('box').onclick(); } });
-function choose(opts, rid){
+function choose(opts, rid, tag){
   return new Promise((res, rej) => {
     if (rid !== runId) return rej('stale');
     const box = $('choices'); box.innerHTML = ''; $('more').classList.remove('on'); $('box').onclick = null;
-    opts.forEach((o, i) => { const b = document.createElement('button'); b.textContent = o.t; b.dataset.i = i; b.addEventListener('click', () => { box.innerHTML = ''; rid === runId ? res(i) : rej('stale'); }); box.appendChild(b); });
+    opts.forEach((o, i) => { const b = document.createElement('button'); b.textContent = o.t; b.dataset.i = i; b.addEventListener('click', () => { box.innerHTML = ''; if (tag && curScene) logChoice(tag, o.t, i); rid === runId ? res(i) : rej('stale'); }); box.appendChild(b); });
   });
+}
+function logChoice(kind, text, i){
+  try { window.sttLog('answers', { kind, scene: curScene.key, era: ERAS[curScene.era].name, who: curScene.who, q: String(lastSaid).slice(0, 300), a: String(text).slice(0, 300), idx: i }); } catch(e){}
 }
 const youLine = t => /^（/.test(t) ? ['*', '你' + t.replace(/^（|）$/g, '') + '。'] : ['you', t];
 async function run(steps, rid){ for (const [w, t] of steps) await line(w, t, rid); }
@@ -1181,22 +1191,24 @@ const quiet = f => (...a) => f(...a).catch(e => { if (e !== 'stale') console.err
 const startSolo = quiet(async function(id){
   const rid = ++runId, p = byId[id], [set, v, place] = SET[id];
   setStage(p.era, set, v, place); addStandee(p, 50, 0.2);
+  curScene = { key: 'p:' + id, era: p.era, who: p.name };
   const sl = a => a.map(x => x[0] === '*' ? ['*', x.slice(1)] : [id, x]);
   await run(sl(p.scene), rid);
-  let i = await choose(p.pick, rid); await run([youLine(p.pick[i].t)].concat(sl(p.pick[i].r)), rid);
+  let i = await choose(p.pick, rid, 'pick'); await run([youLine(p.pick[i].t)].concat(sl(p.pick[i].r)), rid);
   await run(sl(p.mid), rid); await line(id, p.ask, rid);
-  i = await choose(p.ans, rid); record('p:' + id, p.ans[i].t); await run([youLine(p.ans[i].t)].concat(sl(p.ans[i].r)), rid);
+  i = await choose(p.ans, rid, 'ans'); record('p:' + id, p.ans[i].t); await run([youLine(p.ans[i].t)].concat(sl(p.ans[i].r)), rid);
   await line('*', p.give.replace(/^\*/, ''), rid); await giveItem('p:' + id, { ...p.item, from: p.name }, rid);
   await ending(p.era, [id], rid);
 });
 const startDialog = quiet(async function(d){
   const rid = ++runId, A = byId[d.a], B = byId[d.b], k = pairKey(d.a, d.b), [set, v] = DSET[k] || SET[d.a];
   setStage(d.era, set, v, d.place); addStandee(A, 27, 0.2); addStandee(B, 73, 0.5);
+  curScene = { key: 'd:' + k, era: d.era, who: A.name + '、' + B.name };
   const map = a => a.map(([w, t]) => [w === 'a' ? d.a : w === 'b' ? d.b : '*', t]);
   await run(map(d.open), rid);
-  for (const beat of d.beats){ const i = await choose(beat, rid); await run([youLine(beat[i].t)].concat(map(beat[i].r)), rid); }
+  for (const beat of d.beats){ const i = await choose(beat, rid, 'beat'); await run([youLine(beat[i].t)].concat(map(beat[i].r)), rid); }
   await run(map(d.ask), rid);
-  const i = await choose(d.ans, rid); record('d:' + k, d.ans[i].t); await run([youLine(d.ans[i].t)].concat(map(d.ans[i].r)), rid);
+  const i = await choose(d.ans, rid, 'ans'); record('d:' + k, d.ans[i].t); await run([youLine(d.ans[i].t)].concat(map(d.ans[i].r)), rid);
   await giveItem('d:' + k, { ...d.item, from: A.name + '和' + B.name }, rid);
   await ending(d.era, [d.a, d.b], rid);
 });
@@ -1207,6 +1219,35 @@ setFz((() => { try { const v = localStorage.getItem('sugarTimeTalk_fz'); return 
 $('openBtn').addEventListener('click', () => { renderDesk(); showScreen('desk'); });
 window.__game = { startSolo, startDialog, DLG, pairKey, get prog(){ return prog; }, get unlocked(){ return unlocked; } };
 })();
+</script>
+<script type="module">
+/* 工具箱・連線：Firebase 雲端紀錄（只用 Firestore＋匿名登入，不載入 Analytics）
+   寫入 games/sugar-time-talk/visits（每次開啟網頁）與 answers（每次按選項）。
+   學生端只能新增、不能讀取；後台 admin.html 僅限老師帳號讀取。 */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+const GAME = 'sugar-time-talk';
+const firebaseConfig = {
+  apiKey: "AIzaSyAgfzt9-6kUBBpEGAJxN9MoCc50zI1uEsY",
+  authDomain: "classproject-46bdc.firebaseapp.com",
+  projectId: "classproject-46bdc",
+  storageBucket: "classproject-46bdc.firebasestorage.app",
+  messagingSenderId: "939959187654",
+  appId: "1:939959187654:web:60cbcc00330204d0c8bfc7"
+};
+let dev = 'nostore';
+try { dev = localStorage.getItem('sugarTimeTalk_dev') || ''; if (!dev){ dev = Math.random().toString(36).slice(2, 10); localStorage.setItem('sugarTimeTalk_dev', dev); } } catch(e){}
+try {
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  await signInAnonymously(getAuth(app));
+  const send = (col, data) => addDoc(collection(db, 'games', GAME, col), { ...data, dev, t: serverTimestamp() })
+    .catch(e => console.warn('[雲端紀錄] 寫入失敗', e.code || e));
+  window.sttLog = send;
+  send('visits', {});
+  (window.__sttQ || []).splice(0).forEach(([c, d]) => send(c, d));
+} catch(e){ console.warn('[雲端紀錄] 未啟用', e.code || e); }
 </script>
 </body>
 </html>

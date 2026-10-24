@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>糖的時光對話・後台</title>
+<style>
+:root{
+  --ink:#2B231C; --ink2:#5A4C3E; --paper:#F6EEDC; --card:#FBF6EA; --edge:#C9B48E;
+  --brass:#B88A3C; --brass2:#8C6424; --wood:#4A3424; --red:#9A3B2E;
+  --serif:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.6}
+header{background:var(--wood);color:#F3E6C8;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:20px;margin:0;letter-spacing:.1em;flex:1}
+header .who{font-size:13px;opacity:.8}
+button{font:inherit;cursor:pointer;border:1px solid var(--brass2);background:var(--brass);color:#fff;padding:6px 14px;border-radius:4px}
+button.ghost{background:transparent;color:inherit;border-color:currentColor}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--edge);border-radius:6px;padding:16px;margin-bottom:16px}
+.card h2{font-size:17px;margin:0 0 10px;color:var(--brass2)}
+.nums{display:flex;gap:12px;flex-wrap:wrap}
+.num{flex:1;min-width:130px;background:var(--paper);border:1px solid var(--edge);border-radius:6px;padding:10px 12px}
+.num b{display:block;font-size:30px;line-height:1.2}
+.num span{font-size:13px;color:var(--ink2)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px dashed var(--edge);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--ink2);font-weight:600;white-space:nowrap}
+.scroll{overflow-x:auto}
+.q{margin:14px 0 4px;font-weight:600}
+.q small{font-weight:400;color:var(--ink2)}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 120px 40px;gap:8px;align-items:center;font-size:14px;margin:3px 0}
+.bar i{display:block;height:12px;background:var(--brass);border-radius:2px}
+.bar em{font-style:normal;text-align:right;color:var(--ink2)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+select{font:inherit;padding:4px 8px;border:1px solid var(--edge);background:#fff}
+#msg{padding:40px 16px;text-align:center;color:var(--ink2)}
+.err{color:var(--red)}
+@media (max-width:600px){ .bar{grid-template-columns:minmax(0,1fr) 70px 34px} }
+</style>
+</head>
+<body>
+<header>
+  <h1>糖的時光對話・後台</h1>
+  <span class="who" id="who"></span>
+  <button class="ghost" id="reload" hidden>重新整理</button>
+  <button class="ghost" id="logout" hidden>登出</button>
+</header>
+<main>
+  <div id="msg">
+    <p>請用老師的 Google 帳號登入，才能看到紀錄。</p>
+    <button id="login">用 Google 登入</button>
+  </div>
+  <div id="data" hidden>
+    <section class="card">
+      <h2>使用次數</h2>
+      <div class="nums">
+        <div class="num"><b id="nVisit">0</b><span>網頁開啟次數</span></div>
+        <div class="num"><b id="nDev">0</b><span>使用過的裝置數</span></div>
+        <div class="num"><b id="nAns">0</b><span>按選項的次數</span></div>
+      </div>
+      <div class="scroll" style="margin-top:12px"><table id="daily"></table></div>
+    </section>
+    <section class="card">
+      <h2>立場題統計</h2>
+      <p style="margin:0;font-size:14px;color:var(--ink2)">每位人物（或兩人對話）最後那題「如果是你，你會怎麼做」的選擇次數。沒人選過的選項不會出現。</p>
+      <div id="stance"></div>
+    </section>
+    <section class="card">
+      <h2>完整反應紀錄</h2>
+      <div class="tools">
+        <select id="kindSel">
+          <option value="">全部選項</option>
+          <option value="ans">只看立場題</option>
+          <option value="pick">只看開場回應</option>
+          <option value="beat">只看對話中回應</option>
+        </select>
+        <button id="csv">匯出 CSV</button>
+        <span id="cnt" style="font-size:14px;color:var(--ink2)"></span>
+      </div>
+      <div class="scroll"><table id="list"></table></div>
+    </section>
+  </div>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+const GAME = 'sugar-time-talk';
+const TEACHER = 'daimg49@gmail.com';
+const firebaseConfig = {
+  apiKey: "AIzaSyAgfzt9-6kUBBpEGAJxN9MoCc50zI1uEsY",
+  authDomain: "classproject-46bdc.firebaseapp.com",
+  projectId: "classproject-46bdc",
+  storageBucket: "classproject-46bdc.firebasestorage.app",
+  messagingSenderId: "939959187654",
+  appId: "1:939959187654:web:60cbcc00330204d0c8bfc7"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+const KIND = { pick: '開場回應', beat: '對話中', ans: '立場題' };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const tw = d => d ? d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false }) : '';
+const day = d => d ? d.toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' }) : '（時間未知）';
+let answers = [];
+
+$('login').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => showMsg('登入失敗：' + (e.code || e.message), true));
+$('logout').onclick = () => signOut(auth);
+$('reload').onclick = () => load();
+$('kindSel').onchange = renderList;
+$('csv').onclick = exportCsv;
+
+function showMsg(t, err){
+  $('msg').hidden = false; $('data').hidden = true;
+  $('msg').innerHTML = `<p class="${err ? 'err' : ''}">${esc(t)}</p><button id="login2">用 Google 登入</button>`;
+  $('login2').onclick = $('login').onclick;
+}
+
+onAuthStateChanged(auth, u => {
+  $('logout').hidden = !u; $('reload').hidden = !u;
+  $('who').textContent = u ? (u.email || '匿名') : '';
+  if (!u){ $('msg').hidden = false; $('data').hidden = true; return; }
+  if (u.email !== TEACHER){ showMsg(`這個帳號（${u.email || '匿名'}）沒有權限。請登出後改用老師帳號。`, true); return; }
+  load();
+});
+
+async function load(){
+  $('msg').hidden = false; $('data').hidden = true; $('msg').innerHTML = '<p>讀取中……</p>';
+  try {
+    const [vs, as] = await Promise.all([
+      getDocs(query(collection(db, 'games', GAME, 'visits'), orderBy('t', 'desc'))),
+      getDocs(query(collection(db, 'games', GAME, 'answers'), orderBy('t', 'desc')))
+    ]);
+    const visits = vs.docs.map(d => ({ ...d.data(), t: d.data().t?.toDate?.() }));
+    answers = as.docs.map(d => ({ ...d.data(), t: d.data().t?.toDate?.() }));
+    renderSummary(visits); renderStance(); renderList();
+    $('msg').hidden = true; $('data').hidden = false;
+  } catch(e){
+    showMsg('讀取失敗：' + (e.code || e.message) + '（若是 permission-denied，請確認安全規則已發布）', true);
+  }
+}
+
+function renderSummary(visits){
+  $('nVisit').textContent = visits.length;
+  $('nDev').textContent = new Set(visits.map(v => v.dev)).size;
+  $('nAns').textContent = answers.length;
+  const byDay = new Map();
+  const bump = (d, k) => { const key = day(d); if (!byDay.has(key)) byDay.set(key, { v: 0, a: 0, dev: new Set() }); return byDay.get(key); };
+  visits.forEach(v => { const r = bump(v.t); r.v++; r.dev.add(v.dev); });
+  answers.forEach(a => { bump(a.t).a++; });
+  const rows = [...byDay.entries()];
+  $('daily').innerHTML = rows.length
+    ? '<tr><th>日期</th><th>開啟次數</th><th>裝置數</th><th>按選項次數</th></tr>' + rows.map(([k, r]) => `<tr><td>${esc(k)}</td><td>${r.v}</td><td>${r.dev.size}</td><td>${r.a}</td></tr>`).join('')
+    : '<tr><td>還沒有任何紀錄。</td></tr>';
+}
+
+function renderStance(){
+  const groups = new Map();
+  answers.filter(a => a.kind === 'ans').forEach(a => {
+    if (!groups.has(a.scene)) groups.set(a.scene, { who: a.who, era: a.era, q: a.q, opts: new Map(), n: 0 });
+    const g = groups.get(a.scene); g.n++; g.opts.set(a.a, (g.opts.get(a.a) || 0) + 1);
+  });
+  if (!groups.size){ $('stance').innerHTML = '<p>還沒有立場題的紀錄。</p>'; return; }
+  $('stance').innerHTML = [...groups.values()].sort((x, y) => String(x.era).localeCompare(String(y.era))).map(g => {
+    const max = Math.max(...g.opts.values());
+    return `<div class="q">${esc(g.who)} <small>${esc(g.era)}・共 ${g.n} 次</small></div>
+      <div style="font-size:14px;color:var(--ink2);margin-bottom:4px">${esc(g.q)}</div>` +
+      [...g.opts.entries()].sort((a, b) => b[1] - a[1]).map(([t, c]) =>
+        `<div class="bar"><span>${esc(t)}</span><i style="width:${Math.round(c / max * 100)}%"></i><em>${c}</em></div>`).join('');
+  }).join('');
+}
+
+function filtered(){ const k = $('kindSel').value; return k ? answers.filter(a => a.kind === k) : answers; }
+
+function renderList(){
+  const rows = filtered();
+  $('cnt').textContent = `共 ${rows.length} 筆`;
+  $('list').innerHTML = rows.length
+    ? '<tr><th>時間</th><th>年代</th><th>人物</th><th>類型</th><th>人物說的話</th><th>學生的回應</th><th>裝置</th></tr>' +
+      rows.map(a => `<tr><td style="white-space:nowrap">${esc(tw(a.t))}</td><td>${esc(a.era)}</td><td>${esc(a.who)}</td><td>${esc(KIND[a.kind] || a.kind)}</td><td>${esc(a.q)}</td><td>${esc(a.a)}</td><td>${esc(a.dev)}</td></tr>`).join('')
+    : '<tr><td>沒有符合的紀錄。</td></tr>';
+}
+
+function exportCsv(){
+  const head = ['時間', '年代', '人物', '類型', '人物說的話', '學生的回應', '裝置'];
+  const cell = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const lines = [head.map(cell).join(',')].concat(filtered().map(a => [tw(a.t), a.era, a.who, KIND[a.kind] || a.kind, a.q, a.a, a.dev].map(cell).join(',')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob), link = document.createElement('a');
+  link.href = url; link.download = `糖的時光對話_反應紀錄_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+</script>
+</body>
+</html>

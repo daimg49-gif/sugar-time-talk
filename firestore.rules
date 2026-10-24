@@ -1,0 +1,48 @@
+rules_version = '2';
+// 莒光遊戲共用 Firestore 安全規則（專案 classproject-46bdc）
+// 資料路徑：games/{遊戲代號}/{visits|answers}/{自動編號}
+// ・學生（匿名登入）：只能「新增」紀錄，不能讀、改、刪
+// ・老師（daimg49@gmail.com 用 Google 登入）：可以讀取與刪除
+// ・其他路徑一律禁止
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isTeacher() {
+      return request.auth != null
+        && request.auth.token.email == 'daimg49@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function shortStr(v, n) {
+      return v is string && v.size() <= n;
+    }
+
+    function okVisit(d) {
+      return d.keys().hasOnly(['dev', 't'])
+        && shortStr(d.dev, 20)
+        && d.t == request.time;
+    }
+
+    function okAnswer(d) {
+      return d.keys().hasOnly(['kind', 'scene', 'era', 'who', 'q', 'a', 'idx', 'dev', 't'])
+        && d.kind in ['pick', 'beat', 'ans']
+        && shortStr(d.scene, 40)
+        && shortStr(d.era, 40)
+        && shortStr(d.who, 40)
+        && shortStr(d.q, 300)
+        && shortStr(d.a, 300)
+        && d.idx is int && d.idx >= 0 && d.idx < 10
+        && shortStr(d.dev, 20)
+        && d.t == request.time;
+    }
+
+    match /games/{game}/{col}/{doc} {
+      allow read, delete: if isTeacher();
+      allow create: if request.auth != null
+        && game.matches('[a-z0-9-]{1,40}')
+        && ((col == 'visits' && okVisit(request.resource.data))
+         || (col == 'answers' && okAnswer(request.resource.data)));
+      allow update: if false;
+    }
+  }
+}
